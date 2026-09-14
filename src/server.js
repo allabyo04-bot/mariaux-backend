@@ -11,7 +11,7 @@ const horaireRoutes = require('./routes/horaireRoutes');
 const fideleRoutes = require('./routes/fideleRoutes');
 const utilisateurRoutes = require('./routes/utilisateurRoutes');
 const fermetureRoutes = require('./routes/fermetureRoutes');
-const { lancerImportMesses, obtenirStatutImportMesses, ajouterRecapJour } = require('./controllers/syncJourController'); // TEMPORAIRE - à retirer après usage
+const { lancerImportMesses, obtenirStatutImportMesses, ajouterRecapJour, corrigerDateMesses } = require('./controllers/syncJourController'); // TEMPORAIRE - à retirer après usage
 
 const app = express();
 
@@ -32,6 +32,7 @@ app.use('/api/fermetures', fermetureRoutes);
 app.get('/api/sync-messes', lancerImportMesses); // TEMPORAIRE - à retirer après usage
 app.get('/api/sync-messes/statut', obtenirStatutImportMesses); // TEMPORAIRE - à retirer après usage
 app.get('/api/sync-recap-jour', ajouterRecapJour); // TEMPORAIRE - à retirer après usage
+app.get('/api/corriger-date-messes', corrigerDateMesses); // TEMPORAIRE - à retirer après usage
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`LOGESPAC backend démarré sur le port ${PORT}`));

@@ -139,4 +139,24 @@ async function ajouterRecapJour(req, res) {
   }
 }
 
-module.exports = { lancerImportMesses, obtenirStatutImportMesses, ajouterRecapJour };
+// Redate les factures d'import des messes (0 F) à tôt ce matin, pour
+// qu'elles ne comptent plus dans la période ouverte de la Caisse (elles ne
+// servent qu'à l'impression, pas à la comptabilité du jour).
+async function corrigerDateMesses(req, res) {
+  const { cle } = req.query;
+  if (!cle || cle !== process.env.JWT_SECRET) {
+    return res.status(403).json({ erreur: 'Clé invalide' });
+  }
+
+  const tresTot = new Date();
+  tresTot.setHours(3, 0, 0, 0);
+
+  const resultat = await prisma.facture.updateMany({
+    where: { fidele: 'Import (registre) - Messes' },
+    data: { date: tresTot },
+  });
+
+  res.json({ statut: `${resultat.count} facture(s) d'import des messes re-datées au ${tresTot.toISOString()}` });
+}
+
+module.exports = { lancerImportMesses, obtenirStatutImportMesses, ajouterRecapJour, corrigerDateMesses };
