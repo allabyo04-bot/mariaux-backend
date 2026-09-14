@@ -1,0 +1,289 @@
+[
+  {
+    "code": "ABS",
+    "libelle": "ABSOUTE",
+    "type": "A",
+    "prixUnitaire": 10000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "AU1",
+    "libelle": "AUTRE CATECHESE",
+    "type": "A",
+    "prixUnitaire": 0.0,
+    "rubrique": "Catéchèse"
+  },
+  {
+    "code": "ADA",
+    "libelle": "AUTRE DOSSIER ADMINISTRATIF",
+    "type": "A",
+    "prixUnitaire": 0.0,
+    "rubrique": "Dossier Administratif"
+  },
+  {
+    "code": "AO",
+    "libelle": "AUTRE OFFRANDE",
+    "type": "A",
+    "prixUnitaire": 0.0,
+    "rubrique": "Dossier Administratif"
+  },
+  {
+    "code": "ADMM",
+    "libelle": "AUTRES DEMANDES MESSES",
+    "type": "A",
+    "prixUnitaire": 0.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "BA",
+    "libelle": "BAPTEME",
+    "type": "A",
+    "prixUnitaire": 3000.0,
+    "rubrique": "Catéchèse"
+  },
+  {
+    "code": "BACOM",
+    "libelle": "BAPTEME et 1ère COMMUNION",
+    "type": "A",
+    "prixUnitaire": 4000.0,
+    "rubrique": "Catéchèse"
+  },
+  {
+    "code": "CAM",
+    "libelle": "CAMERA",
+    "type": "A",
+    "prixUnitaire": 3000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "CHO",
+    "libelle": "CHORALE FRANCAISE  (1/5)",
+    "type": "A",
+    "prixUnitaire": 4000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "CON",
+    "libelle": "CONFIRMATION",
+    "type": "A",
+    "prixUnitaire": 3000.0,
+    "rubrique": "Catéchèse"
+  },
+  {
+    "code": "DM",
+    "libelle": "DEMANDE DE MESSE",
+    "type": "B",
+    "prixUnitaire": 2000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "DCA",
+    "libelle": "DENIER DE CULTE AUTRE CATEGORIE",
+    "type": "A",
+    "prixUnitaire": 0.0,
+    "rubrique": "Denier de culte"
+  },
+  {
+    "code": "DCF",
+    "libelle": "DENIER DE CULTE FEMME",
+    "type": "A",
+    "prixUnitaire": 1000.0,
+    "rubrique": "Denier de culte"
+  },
+  {
+    "code": "DCH",
+    "libelle": "DENIER DE CULTE HOMME",
+    "type": "A",
+    "prixUnitaire": 2000.0,
+    "rubrique": "Denier de culte"
+  },
+  {
+    "code": "DCRA",
+    "libelle": "DENIER DE CULTE RECUS ARCHEVECHE",
+    "type": "A",
+    "prixUnitaire": 0.0,
+    "rubrique": "Denier de culte"
+  },
+  {
+    "code": "2EL",
+    "libelle": "DEUXIEME ETAPE LANGUE",
+    "type": "A",
+    "prixUnitaire": 600.0,
+    "rubrique": "Catéchèse"
+  },
+  {
+    "code": "2E",
+    "libelle": "DEUXIEME ETAPE SEC, SCO, UNI",
+    "type": "A",
+    "prixUnitaire": 600.0,
+    "rubrique": "Catéchèse"
+  },
+  {
+    "code": "DF",
+    "libelle": "DON",
+    "type": "A",
+    "prixUnitaire": 0.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "ENG",
+    "libelle": "ENGAGEMENT",
+    "type": "A",
+    "prixUnitaire": 3000.0,
+    "rubrique": "Catéchèse"
+  },
+  {
+    "code": "FDM",
+    "libelle": "FRAIS DE DOSSIER MARIAGE",
+    "type": "A",
+    "prixUnitaire": 5000.0,
+    "rubrique": "Dossier Administratif"
+  },
+  {
+    "code": "FDB",
+    "libelle": "FRAIS DOSSIER BAPTEME ENFANT",
+    "type": "A",
+    "prixUnitaire": 5500.0,
+    "rubrique": "Dossier Administratif"
+  },
+  {
+    "code": "IC",
+    "libelle": "INSCRIPTION CATECHESE",
+    "type": "A",
+    "prixUnitaire": 600.0,
+    "rubrique": "Catéchèse"
+  },
+  {
+    "code": "DL",
+    "libelle": "LIVRET DE CATHOLICITE / DUPLICATA",
+    "type": "A",
+    "prixUnitaire": 1000.0,
+    "rubrique": "Dossier Administratif"
+  },
+  {
+    "code": "LB",
+    "libelle": "LOCATION BOUTIQUE / MOIS",
+    "type": "A",
+    "prixUnitaire": 40000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "LOC",
+    "libelle": "LOCATION SALLE / PLACE",
+    "type": "A",
+    "prixUnitaire": 25000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "MC",
+    "libelle": "MARIAGE CELEBRATIN",
+    "type": "A",
+    "prixUnitaire": 10000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "MCP",
+    "libelle": "MESSE CORPS PRESENT",
+    "type": "A",
+    "prixUnitaire": 10000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "MAG",
+    "libelle": "MESSE D'ACTION DE GRACE",
+    "type": "A",
+    "prixUnitaire": 10000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "MRD",
+    "libelle": "MESSE DE REMISE DE DIPLOME",
+    "type": "A",
+    "prixUnitaire": 10000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "MD",
+    "libelle": "MESSE DECEMBRE AG",
+    "type": "B",
+    "prixUnitaire": 500.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "MDN",
+    "libelle": "MESSE DEFUNTS NOVEMBRE",
+    "type": "B",
+    "prixUnitaire": 500.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "OV",
+    "libelle": "OFFRANDE VIN",
+    "type": "A",
+    "prixUnitaire": 4000.0,
+    "rubrique": "Dossier Administratif"
+  },
+  {
+    "code": "PHO",
+    "libelle": "PHOTO CAMERA MESSE",
+    "type": "A",
+    "prixUnitaire": 5000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "PH",
+    "libelle": "PHOTO MESSE",
+    "type": "A",
+    "prixUnitaire": 2000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "PVD",
+    "libelle": "PIERRE VIVANTE ET DIME",
+    "type": "A",
+    "prixUnitaire": 0.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "1CO",
+    "libelle": "PREMIERE COMMUNION",
+    "type": "A",
+    "prixUnitaire": 3000.0,
+    "rubrique": "Catéchèse"
+  },
+  {
+    "code": "1EL",
+    "libelle": "PREMIERE ETAPE LANGUE",
+    "type": "A",
+    "prixUnitaire": 600.0,
+    "rubrique": "Catéchèse"
+  },
+  {
+    "code": "1E",
+    "libelle": "PREMIERE ETAPE SEC, SCO, UNI",
+    "type": "A",
+    "prixUnitaire": 600.0,
+    "rubrique": "Catéchèse"
+  },
+  {
+    "code": "PD",
+    "libelle": "PRIE-DIEU DECO MARIAGE",
+    "type": "A",
+    "prixUnitaire": 5000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "VM",
+    "libelle": "VEILLEE  MESSE",
+    "type": "A",
+    "prixUnitaire": 10000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  },
+  {
+    "code": "VP",
+    "libelle": "VEILLEE DE PRIERE",
+    "type": "A",
+    "prixUnitaire": 10000.0,
+    "rubrique": "Célébration des Messes et Autres"
+  }
+]

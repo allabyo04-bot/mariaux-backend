@@ -1,0 +1,102 @@
+[
+  {
+    "jour": "LUNDI",
+    "heure": "06:30"
+  },
+  {
+    "jour": "LUNDI",
+    "heure": "07:30"
+  },
+  {
+    "jour": "LUNDI",
+    "heure": "19:30"
+  },
+  {
+    "jour": "MARDI",
+    "heure": "06:30"
+  },
+  {
+    "jour": "MARDI",
+    "heure": "07:30"
+  },
+  {
+    "jour": "MARDI",
+    "heure": "19:30"
+  },
+  {
+    "jour": "MERCREDI",
+    "heure": "06:30"
+  },
+  {
+    "jour": "MERCREDI",
+    "heure": "07:30"
+  },
+  {
+    "jour": "MERCREDI",
+    "heure": "10:00"
+  },
+  {
+    "jour": "MERCREDI",
+    "heure": "12:30"
+  },
+  {
+    "jour": "MERCREDI",
+    "heure": "19:30"
+  },
+  {
+    "jour": "JEUDI",
+    "heure": "06:30"
+  },
+  {
+    "jour": "JEUDI",
+    "heure": "07:30"
+  },
+  {
+    "jour": "JEUDI",
+    "heure": "19:30"
+  },
+  {
+    "jour": "VENDREDI",
+    "heure": "06:30"
+  },
+  {
+    "jour": "VENDREDI",
+    "heure": "07:30"
+  },
+  {
+    "jour": "VENDREDI",
+    "heure": "13:00"
+  },
+  {
+    "jour": "VENDREDI",
+    "heure": "19:30"
+  },
+  {
+    "jour": "SAMEDI",
+    "heure": "06:45"
+  },
+  {
+    "jour": "SAMEDI",
+    "heure": "18:30"
+  },
+  {
+    "jour": "DIMANCHE",
+    "heure": "06:45"
+  },
+  {
+    "jour": "DIMANCHE",
+    "heure": "08:15"
+  },
+  {
+    "jour": "DIMANCHE",
+    "heure": "09:30"
+  },
+  {
+    "jour": "DIMANCHE",
+    "heure": "11:00"
+  },
+  {
+    "jour": "DIMANCHE",
+    "heure": "18:30"
+  }
+]
