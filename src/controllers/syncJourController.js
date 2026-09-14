@@ -148,8 +148,7 @@ async function corrigerDateMesses(req, res) {
     return res.status(403).json({ erreur: 'Clé invalide' });
   }
 
-  const tresTot = new Date();
-  tresTot.setHours(3, 0, 0, 0);
+  const tresTot = new Date('2020-01-01T03:00:00');
 
   const resultat = await prisma.facture.updateMany({
     where: { fidele: 'Import (registre) - Messes' },
