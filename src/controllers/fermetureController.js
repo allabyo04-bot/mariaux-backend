@@ -92,4 +92,35 @@ async function listerFermetures(req, res) {
   res.json(fermetures);
 }
 
-module.exports = { obtenirPeriodeOuverte, creerFermeture, listerFermetures, derniereFermeture };
+// Détail par rubrique d'une fermeture déjà faite — pour le bordereau imprimable
+async function obtenirDetailFermeture(req, res) {
+  const { id } = req.params;
+  const fermeture = await prisma.fermetureCaisse.findUnique({
+    where: { id },
+    include: { faitPar: { select: { nom: true } } },
+  });
+  if (!fermeture) return res.status(404).json({ erreur: 'Fermeture introuvable' });
+
+  const lignes = await prisma.ligneFacture.findMany({
+    where: { facture: { date: { gt: fermeture.dateDebut, lte: fermeture.dateFin } } },
+    include: { designation: { include: { rubrique: true } }, facture: { select: { netAPayer: true, montantRecu: true } } },
+  });
+
+  const parRubrique = {};
+  for (const l of lignes) {
+    const nomRubrique = l.designation.rubrique?.libelle || 'Sans rubrique';
+    parRubrique[nomRubrique] = (parRubrique[nomRubrique] || 0) + Number(l.montant);
+  }
+
+  if (Number(fermeture.totalExcedent) > 0) {
+    parRubrique['Dons complémentaires'] = (parRubrique['Dons complémentaires'] || 0) + Number(fermeture.totalExcedent);
+  }
+
+  const recapRubriques = Object.entries(parRubrique)
+    .sort(([, a], [, b]) => b - a)
+    .map(([rubrique, montant]) => ({ rubrique, montant }));
+
+  res.json({ ...fermeture, recapRubriques });
+}
+
+module.exports = { obtenirPeriodeOuverte, creerFermeture, listerFermetures, derniereFermeture, obtenirDetailFermeture };
