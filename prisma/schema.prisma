@@ -1,0 +1,158 @@
+// LOGESPAC - Gestion de paroisse (version web)
+// Périmètre : facturation Type A / Type B (Demande de Messe) + 2 rôles (Curé / Caisse)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CURE
+  CAISSE
+}
+
+enum TypeDesignation {
+  A // désignation simple : PU x quantité = montant
+  B // Demande de Messe : ouvre la fenêtre intention/date/heure
+}
+
+enum JourSemaine {
+  LUNDI
+  MARDI
+  MERCREDI
+  JEUDI
+  VENDREDI
+  SAMEDI
+  DIMANCHE
+}
+
+// Grille fixe des horaires de messe de la paroisse, par jour de semaine.
+// La Caisse choisit parmi ces horaires, elle ne saisit jamais une heure librement.
+model HoraireMesse {
+  id     String      @id @default(cuid())
+  jour   JourSemaine
+  heure  String      // "HH:MM"
+  actif  Boolean     @default(true)
+
+  @@unique([jour, heure])
+}
+
+model Utilisateur {
+  id        String   @id @default(cuid())
+  nom       String
+  identifiant String @unique
+  pinHash   String
+  role      Role
+  actif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  factures  Facture[]
+  fermetures FermetureCaisse[]
+}
+
+// Rubrique / famille de désignations, utilisée pour le regroupement
+// des recettes sur le dashboard du Curé ("recettes du jour par rubrique")
+model Rubrique {
+  id           String        @id @default(cuid())
+  libelle      String        @unique
+  designations Designation[]
+}
+
+model Designation {
+  id            String          @id @default(cuid())
+  code          String          @unique
+  libelle       String
+  type          TypeDesignation
+  prixUnitaire  Decimal         @default(0) @db.Decimal(12, 2)
+  actif         Boolean         @default(true)
+  rubriqueId    String?
+  rubrique      Rubrique?       @relation(fields: [rubriqueId], references: [id])
+
+  lignesFacture LigneFacture[]
+}
+
+// Fidèle récurrent : permet de retrouver un nom déjà connu et de préremplir
+// son intention habituelle lors d'une nouvelle demande de messe.
+model Fidele {
+  id                      String   @id @default(cuid())
+  nom                     String   @unique
+  typeIntentionParDefaut  String?
+  intentionParDefaut      String?  @db.Text
+  createdAt               DateTime @default(now())
+}
+
+model Facture {
+  id            String    @id @default(cuid())
+  numero        String    @unique // ex: 13579/23
+  date          DateTime  @default(now())
+  fidele        String    // nom du fidèle, saisie libre comme sur LOGESPAC desktop
+
+  etablitParId  String
+  etablitPar    Utilisateur @relation(fields: [etablitParId], references: [id])
+
+  montantTotal  Decimal   @default(0) @db.Decimal(12, 2)
+  remise        Decimal   @default(0) @db.Decimal(12, 2)
+  netAPayer     Decimal   @default(0) @db.Decimal(12, 2)
+
+  // Ce que le fidèle a réellement donné, quand ça dépasse le net à payer
+  // sans qu'il ne demande de prestation supplémentaire (don complémentaire).
+  montantRecu   Decimal?  @db.Decimal(12, 2)
+
+  lignes        LigneFacture[]
+
+  createdAt     DateTime  @default(now())
+}
+
+model LigneFacture {
+  id             String       @id @default(cuid())
+  factureId      String
+  facture        Facture      @relation(fields: [factureId], references: [id], onDelete: Cascade)
+
+  designationId  String
+  designation    Designation  @relation(fields: [designationId], references: [id])
+
+  quantite       Decimal      @default(1) @db.Decimal(10, 2)
+  prixUnitaire   Decimal      @db.Decimal(12, 2) // figé au moment de la vente
+  montant        Decimal      @db.Decimal(12, 2)
+
+  // une ligne Type B peut couvrir plusieurs dates (ex : neuvaine, triduum)
+  demandesMesse  DemandeMesse[]
+}
+
+model DemandeMesse {
+  id              String       @id @default(cuid())
+  ligneFactureId  String
+  ligneFacture    LigneFacture @relation(fields: [ligneFactureId], references: [id], onDelete: Cascade)
+
+  typeIntention   String       // ex: "Action de Grâce"
+  intention       String       @db.Text // texte complet ("Pour implorer l'assistance...")
+  dateMesse       DateTime
+  heureDebut      String       // choisie parmi la grille HoraireMesse, format "HH:MM"
+
+  createdAt       DateTime     @default(now())
+
+  @@index([dateMesse])
+}
+
+// Fermeture de caisse : rassemble toutes les ventes depuis la fermeture précédente
+// (ou depuis le début si c'est la première). Déclenchée manuellement par la Caisse.
+// Une fois une fermeture faite, tout ce qui est avant sa date de fin devient
+// hors de portée de la Caisse (verrouillé), seul le Curé peut encore le consulter.
+model FermetureCaisse {
+  id              String      @id @default(cuid())
+  dateDebut       DateTime    // fin de la fermeture précédente (ou date très ancienne si c'est la première)
+  dateFin         DateTime    @default(now())
+
+  nombreFactures  Int
+  totalNetAPayer  Decimal     @db.Decimal(12, 2)
+  totalExcedent   Decimal     @db.Decimal(12, 2)
+
+  faitParId       String
+  faitPar         Utilisateur @relation(fields: [faitParId], references: [id])
+
+  createdAt       DateTime    @default(now())
+}
