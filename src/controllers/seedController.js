@@ -1,8 +1,13 @@
-// Exécution : node src/scripts/seed.js
+// ROUTE TEMPORAIRE - à supprimer après le premier lancement.
 const bcrypt = require('bcryptjs');
 const prisma = require('../lib/prisma');
 
-async function main() {
+async function lancerSeed(req, res) {
+  const { cle } = req.query;
+  if (!cle || cle !== process.env.JWT_SECRET) {
+    return res.status(403).json({ erreur: 'Clé invalide' });
+  }
+
   const pinCureHash = await bcrypt.hash('1234', 10);
   const pinSecretariatHash = await bcrypt.hash('1234', 10);
 
@@ -33,45 +38,22 @@ async function main() {
   await prisma.designation.upsert({
     where: { code: 'MD' },
     update: {},
-    create: {
-      code: 'MD',
-      libelle: 'DEMANDE DE MESSE',
-      type: 'B',
-      prixUnitaire: 2000,
-      rubriqueId: rubriqueMesses.id,
-    },
+    create: { code: 'MD', libelle: 'DEMANDE DE MESSE', type: 'B', prixUnitaire: 2000, rubriqueId: rubriqueMesses.id },
   });
 
   await prisma.designation.upsert({
     where: { code: 'AUT4' },
     update: {},
-    create: {
-      code: 'AUT4',
-      libelle: 'DENIER DE CULTE FEMME',
-      type: 'A',
-      prixUnitaire: 43000,
-      rubriqueId: rubriqueDenier.id,
-    },
+    create: { code: 'AUT4', libelle: 'DENIER DE CULTE FEMME', type: 'A', prixUnitaire: 43000, rubriqueId: rubriqueDenier.id },
   });
 
   await prisma.designation.upsert({
     where: { code: 'AUT5' },
     update: {},
-    create: {
-      code: 'AUT5',
-      libelle: 'DENIER DE CULTE HOMME',
-      type: 'A',
-      prixUnitaire: 43000,
-      rubriqueId: rubriqueDenier.id,
-    },
+    create: { code: 'AUT5', libelle: 'DENIER DE CULTE HOMME', type: 'A', prixUnitaire: 43000, rubriqueId: rubriqueDenier.id },
   });
 
-  console.log('Seed terminé : comptes cure/1234 et secretariat/1234 créés.');
+  res.json({ statut: 'Seed terminé : comptes cure/1234 et secretariat/1234 créés.' });
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+module.exports = { lancerSeed };
