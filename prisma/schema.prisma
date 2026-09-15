@@ -52,6 +52,7 @@ model Utilisateur {
 
   factures  Facture[]
   fermetures FermetureCaisse[]
+  corrections CorrectionIntention[]
 }
 
 // Rubrique / famille de désignations, utilisée pour le regroupement
@@ -135,7 +136,28 @@ model DemandeMesse {
 
   createdAt       DateTime     @default(now())
 
+  corrections     CorrectionIntention[]
+
   @@index([dateMesse])
+}
+
+// Journal des corrections apportées au texte d'une intention déjà enregistrée.
+// La Caisse ne peut corriger qu'une fois, et seulement tant que la messe n'a
+// pas encore eu lieu ; le Curé peut corriger sans limite. Chaque correction
+// garde une trace (motif obligatoire), consultable par le Curé.
+model CorrectionIntention {
+  id                  String        @id @default(cuid())
+  demandeMesseId      String
+  demandeMesse        DemandeMesse  @relation(fields: [demandeMesseId], references: [id], onDelete: Cascade)
+
+  ancienneIntention   String        @db.Text
+  nouvelleIntention   String        @db.Text
+  motif               String        @db.Text
+
+  faitParId           String
+  faitPar             Utilisateur   @relation(fields: [faitParId], references: [id])
+
+  createdAt           DateTime      @default(now())
 }
 
 // Fermeture de caisse : rassemble toutes les ventes depuis la fermeture précédente

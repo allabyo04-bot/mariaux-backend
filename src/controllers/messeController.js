@@ -22,6 +22,7 @@ async function listerMesses(req, res) {
       ligneFacture: {
         include: { facture: { select: { numero: true, fidele: true, date: true } } },
       },
+      _count: { select: { corrections: true } },
     },
     orderBy: [{ dateMesse: 'asc' }, { heureDebut: 'asc' }],
   });
@@ -35,6 +36,7 @@ async function listerMesses(req, res) {
       intention: m.intention,
       fidele: m.ligneFacture.facture.fidele,
       numeroFacture: m.ligneFacture.facture.numero,
+      nombreCorrections: m._count.corrections,
     }))
   );
 }
@@ -66,4 +68,67 @@ async function modifierDemandeMesse(req, res) {
   res.json(misAJour);
 }
 
-module.exports = { listerMesses, modifierDemandeMesse };
+// Corrige le texte d'une intention déjà enregistrée (faute de frappe, etc.).
+// - La Caisse : une seule correction autorisée par intention, et seulement
+//   tant que la messe n'a pas encore eu lieu.
+// - Le Curé : aucune limite (ni de nombre, ni de date).
+// Chaque correction est journalisée avec un motif obligatoire.
+async function corrigerIntention(req, res) {
+  const { id } = req.params;
+  const { nouvelleIntention, motif } = req.body;
+
+  if (!nouvelleIntention || !nouvelleIntention.trim()) {
+    return res.status(400).json({ erreur: 'La nouvelle intention est requise' });
+  }
+  if (!motif || !motif.trim()) {
+    return res.status(400).json({ erreur: 'Le motif de la correction est requis' });
+  }
+
+  const demandeMesse = await prisma.demandeMesse.findUnique({
+    where: { id },
+    include: { _count: { select: { corrections: true } } },
+  });
+  if (!demandeMesse) return res.status(404).json({ erreur: 'Demande de messe introuvable' });
+
+  if (req.utilisateur.role === 'CAISSE') {
+    if (demandeMesse.dateMesse < new Date()) {
+      return res.status(403).json({ erreur: 'Cette messe a déjà eu lieu — seul le Curé peut encore corriger cette intention' });
+    }
+    if (demandeMesse._count.corrections >= 1) {
+      return res.status(403).json({ erreur: 'Cette intention a déjà été corrigée une fois — seul le Curé peut la corriger à nouveau' });
+    }
+  }
+
+  const [, misAJour] = await prisma.$transaction([
+    prisma.correctionIntention.create({
+      data: {
+        demandeMesseId: id,
+        ancienneIntention: demandeMesse.intention,
+        nouvelleIntention: nouvelleIntention.trim(),
+        motif: motif.trim(),
+        faitParId: req.utilisateur.id,
+      },
+    }),
+    prisma.demandeMesse.update({
+      where: { id },
+      data: { intention: nouvelleIntention.trim() },
+    }),
+  ]);
+
+  res.json(misAJour);
+}
+
+// Journal des corrections d'intention — réservé au Curé
+async function listerCorrectionsIntention(req, res) {
+  const corrections = await prisma.correctionIntention.findMany({
+    include: {
+      faitPar: { select: { nom: true } },
+      demandeMesse: { select: { dateMesse: true, heureDebut: true, typeIntention: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 200,
+  });
+  res.json(corrections);
+}
+
+module.exports = { listerMesses, modifierDemandeMesse, corrigerIntention, listerCorrectionsIntention };
