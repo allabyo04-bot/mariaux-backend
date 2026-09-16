@@ -1,8 +1,17 @@
 const prisma = require('../lib/prisma');
 const { heureEstValide } = require('./horaireController');
-const { derniereFermeture } = require('./fermetureController');
 
-const DATE_ORIGINE = new Date('2000-01-01T00:00:00');
+function debutAujourdhui() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function finAujourdhui() {
+  const d = new Date();
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
 
 // Génère un numéro du type 13579/23 (compteur global + 2 derniers chiffres de l'année)
 async function genererNumero() {
@@ -141,18 +150,15 @@ async function obtenirFacture(req, res) {
   res.json({ ...facture, excedent });
 }
 
-// La Caisse ne voit que les factures depuis la dernière fermeture de caisse
-// (pas seulement le jour), puisqu'une fermeture peut couvrir plusieurs jours
-// si elle n'est pas faite quotidiennement. Le Curé peut filtrer par période,
-// numéro ou nom du fidèle, sans restriction.
+// La Caisse ne voit que les factures du jour (la fermeture de caisse a été
+// abandonnée au profit d'un simple récap imprimable du jour). Le Curé peut
+// filtrer par période, numéro ou nom du fidèle, sans restriction.
 async function listerFactures(req, res) {
   const estCaisse = req.utilisateur.role === 'CAISSE';
   let where = {};
 
   if (estCaisse) {
-    const derniere = await derniereFermeture();
-    const debut = derniere ? derniere.dateFin : DATE_ORIGINE;
-    where.date = { gt: debut };
+    where.date = { gte: debutAujourdhui(), lte: finAujourdhui() };
   } else {
     if (req.query.debut && req.query.fin) {
       where.date = { gte: new Date(req.query.debut), lte: new Date(`${req.query.fin}T23:59:59`) };
@@ -174,20 +180,17 @@ async function listerFactures(req, res) {
   res.json(factures);
 }
 
-// Annule (supprime) une facture — la Caisse ne peut annuler qu'une facture de la
-// période ouverte actuelle (pas encore fermée) ; le Curé peut annuler n'importe
-// quelle facture. Les lignes et demandes de messe liées disparaissent avec
-// (onDelete: Cascade dans le schéma).
+// Annule (supprime) une facture — la Caisse ne peut annuler qu'une facture du
+// jour même ; le Curé peut annuler n'importe quelle facture. Les lignes et
+// demandes de messe liées disparaissent avec (onDelete: Cascade dans le schéma).
 async function annulerFacture(req, res) {
   const { id } = req.params;
   const facture = await prisma.facture.findUnique({ where: { id } });
   if (!facture) return res.status(404).json({ erreur: 'Facture introuvable' });
 
   if (req.utilisateur.role === 'CAISSE') {
-    const derniere = await derniereFermeture();
-    const debut = derniere ? derniere.dateFin : DATE_ORIGINE;
-    if (facture.date <= debut) {
-      return res.status(403).json({ erreur: 'Cette facture appartient à une période déjà fermée — seul le Curé peut y toucher' });
+    if (facture.date < debutAujourdhui()) {
+      return res.status(403).json({ erreur: "Cette facture n'est pas d'aujourd'hui — seul le Curé peut y toucher" });
     }
   }
 
