@@ -11,6 +11,7 @@ const horaireRoutes = require('./routes/horaireRoutes');
 const fideleRoutes = require('./routes/fideleRoutes');
 const utilisateurRoutes = require('./routes/utilisateurRoutes');
 const fermetureRoutes = require('./routes/fermetureRoutes');
+const { diagnosticFermetures } = require('./controllers/diagnosticController'); // TEMPORAIRE - diagnostic
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use('/api/horaires', horaireRoutes);
 app.use('/api/fideles', fideleRoutes);
 app.use('/api/utilisateurs', utilisateurRoutes);
 app.use('/api/fermetures', fermetureRoutes);
+app.get('/api/diagnostic-fermetures', diagnosticFermetures); // TEMPORAIRE - diagnostic
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`LOGESPAC backend démarré sur le port ${PORT}`));
