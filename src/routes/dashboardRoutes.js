@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { verifierToken, reserverAuCure } = require('../middleware/auth');
-const { recettesDuJour, etatRecettes, exporterRecettesCsv } = require('../controllers/dashboardController');
+const { recettesDuJour, recettesSemaine, etatRecettes, exporterRecettesCsv } = require('../controllers/dashboardController');
 
 router.use(verifierToken);
 
-// Accessible aux deux rôles : la Caisse doit pouvoir voir son propre récap
-// du jour, indépendamment d'une éventuelle fermeture de caisse déjà faite.
+// Accessibles aux deux rôles : la Caisse doit pouvoir voir son propre récap
+// du jour et de la semaine, indépendamment d'une éventuelle fermeture de caisse.
 router.get('/recettes-jour', recettesDuJour);
+router.get('/recettes-semaine', recettesSemaine);
 
 // Réservé au Curé
 router.get('/etat-recettes', reserverAuCure, etatRecettes);

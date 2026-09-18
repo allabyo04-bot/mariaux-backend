@@ -191,4 +191,49 @@ async function exporterRecettesCsv(req, res) {
   res.send(csv);
 }
 
-module.exports = { recettesDuJour, etatRecettes, exporterRecettesCsv };
+// Récap de la semaine en cours (lundi 00h00 au samedi 23h59), par rubrique —
+// accessible à la Caisse pour son propre bilan hebdomadaire imprimable.
+async function recettesSemaine(req, res) {
+  const debutSemaine = new Date();
+  const jourSemaine = debutSemaine.getDay(); // 0 = dimanche
+  const decalageLundi = jourSemaine === 0 ? -6 : 1 - jourSemaine;
+  debutSemaine.setDate(debutSemaine.getDate() + decalageLundi);
+  debutSemaine.setHours(0, 0, 0, 0);
+  const finSemaine = new Date(debutSemaine);
+  finSemaine.setDate(debutSemaine.getDate() + 5); // samedi
+  finSemaine.setHours(23, 59, 59, 999);
+
+  const where = { facture: { date: { gte: debutSemaine, lte: finSemaine } } };
+
+  const lignes = await prisma.ligneFacture.findMany({
+    where,
+    include: { designation: { include: { rubrique: true } } },
+  });
+
+  const parRubrique = {};
+  let totalSemaine = 0;
+  for (const l of lignes) {
+    const nomRubrique = l.designation.rubrique?.libelle || 'Sans rubrique';
+    const montant = Number(l.montant);
+    parRubrique[nomRubrique] = (parRubrique[nomRubrique] || 0) + montant;
+    totalSemaine += montant;
+  }
+
+  const excedentSemaine = await sommeExcedents({ date: { gte: debutSemaine, lte: finSemaine } });
+  if (excedentSemaine > 0) {
+    parRubrique['Dons complémentaires'] = (parRubrique['Dons complémentaires'] || 0) + excedentSemaine;
+    totalSemaine += excedentSemaine;
+  }
+
+  const nombreFactures = await prisma.facture.count({ where: { date: { gte: debutSemaine, lte: finSemaine } } });
+
+  res.json({
+    dateDebut: debutSemaine,
+    dateFin: finSemaine,
+    nombreFactures,
+    totalSemaine,
+    parRubrique: Object.entries(parRubrique).map(([rubrique, montant]) => ({ rubrique, montant })),
+  });
+}
+
+module.exports = { recettesDuJour, recettesSemaine, etatRecettes, exporterRecettesCsv };
