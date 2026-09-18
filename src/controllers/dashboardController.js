@@ -42,6 +42,22 @@ async function recettesDuJour(req, res) {
   debutMois.setDate(1);
   debutMois.setHours(0, 0, 0, 0);
 
+  // Semaine en cours : du lundi (00h00) au samedi (23h59), fin du service
+  const debutSemaine = new Date();
+  const jourSemaine = debutSemaine.getDay(); // 0 = dimanche
+  const decalageLundi = jourSemaine === 0 ? -6 : 1 - jourSemaine;
+  debutSemaine.setDate(debutSemaine.getDate() + decalageLundi);
+  debutSemaine.setHours(0, 0, 0, 0);
+  const finSemaine = new Date(debutSemaine);
+  finSemaine.setDate(debutSemaine.getDate() + 5); // samedi
+  finSemaine.setHours(23, 59, 59, 999);
+
+  const cumulSemaineAgg = await prisma.ligneFacture.aggregate({
+    where: { facture: { date: { gte: debutSemaine, lte: finSemaine } } },
+    _sum: { montant: true },
+  });
+  const excedentSemaine = await sommeExcedents({ date: { gte: debutSemaine, lte: finSemaine } });
+
   const cumulMoisAgg = await prisma.ligneFacture.aggregate({
     where: { facture: { date: { gte: debutMois } } },
     _sum: { montant: true },
@@ -52,6 +68,7 @@ async function recettesDuJour(req, res) {
   res.json({
     parRubrique: Object.entries(parRubrique).map(([rubrique, montant]) => ({ rubrique, montant })),
     totalJour,
+    cumulSemaine: Number(cumulSemaineAgg._sum.montant || 0) + excedentSemaine,
     cumulMois: Number(cumulMoisAgg._sum.montant || 0) + excedentMois,
   });
 }
