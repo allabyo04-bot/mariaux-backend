@@ -12,6 +12,21 @@ async function sommeExcedents(where) {
   }, 0);
 }
 
+// Regroupe des lignes de facture par désignation : nombre réalisé + montant total,
+// pour le détail attendu par la Caisse ("DEMANDE DE MESSE : 48 x 2000 F = 96000 F").
+function regrouperParDesignation(lignes) {
+  const parDesignation = {};
+  for (const l of lignes) {
+    const libelle = l.designation.libelle;
+    if (!parDesignation[libelle]) {
+      parDesignation[libelle] = { libelle, quantite: 0, montant: 0 };
+    }
+    parDesignation[libelle].quantite += Number(l.quantite);
+    parDesignation[libelle].montant += Number(l.montant);
+  }
+  return Object.values(parDesignation).sort((a, b) => b.montant - a.montant);
+}
+
 async function recettesDuJour(req, res) {
   const debut = new Date();
   debut.setHours(0, 0, 0, 0);
@@ -31,6 +46,7 @@ async function recettesDuJour(req, res) {
     parRubrique[nomRubrique] = (parRubrique[nomRubrique] || 0) + montant;
     totalJour += montant;
   }
+  const parDesignation = regrouperParDesignation(lignes);
 
   const excedentJour = await sommeExcedents({ date: { gte: debut, lte: fin } });
   if (excedentJour > 0) {
@@ -67,6 +83,7 @@ async function recettesDuJour(req, res) {
 
   res.json({
     parRubrique: Object.entries(parRubrique).map(([rubrique, montant]) => ({ rubrique, montant })),
+    parDesignation,
     totalJour,
     cumulSemaine: Number(cumulSemaineAgg._sum.montant || 0) + excedentSemaine,
     cumulMois: Number(cumulMoisAgg._sum.montant || 0) + excedentMois,
@@ -218,6 +235,7 @@ async function recettesSemaine(req, res) {
     parRubrique[nomRubrique] = (parRubrique[nomRubrique] || 0) + montant;
     totalSemaine += montant;
   }
+  const parDesignation = regrouperParDesignation(lignes);
 
   const excedentSemaine = await sommeExcedents({ date: { gte: debutSemaine, lte: finSemaine } });
   if (excedentSemaine > 0) {
@@ -233,6 +251,7 @@ async function recettesSemaine(req, res) {
     nombreFactures,
     totalSemaine,
     parRubrique: Object.entries(parRubrique).map(([rubrique, montant]) => ({ rubrique, montant })),
+    parDesignation,
   });
 }
 
