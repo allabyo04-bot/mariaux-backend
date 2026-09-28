@@ -50,9 +50,25 @@ model Utilisateur {
   actif     Boolean  @default(true)
   createdAt DateTime @default(now())
 
+  // Protection anti-devinette : échecs consécutifs et fin de blocage éventuel
+  echecsConsecutifs Int       @default(0)
+  bloqueJusqua      DateTime?
+
   factures  Facture[]
   fermetures FermetureCaisse[]
   corrections CorrectionIntention[]
+}
+
+// Journal des tentatives de connexion (réussies, ratées, bloquées) — consultable par le Curé.
+// resultat : SUCCES | ECHEC | BLOQUE | INCONNU | DESACTIVE. Le PIN saisi n'est jamais conservé.
+model TentativeConnexion {
+  id          String   @id @default(cuid())
+  identifiant String
+  resultat    String
+  ip          String?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 // Rubrique / famille de désignations, utilisée pour le regroupement
