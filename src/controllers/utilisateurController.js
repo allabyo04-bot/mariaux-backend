@@ -20,7 +20,7 @@ async function creerUtilisateur(req, res) {
     return res.status(400).json({ erreur: 'Rôle invalide' });
   }
   if (pin.length < 4) {
-    return res.status(400).json({ erreur: 'Le PIN doit faire au moins 4 chiffres' });
+    return res.status(400).json({ erreur: 'Le PIN doit faire au moins 4 caractères' });
   }
 
   try {
@@ -72,7 +72,7 @@ async function reinitialiserPin(req, res) {
   const { id } = req.params;
   const { nouveauPin } = req.body;
   if (!nouveauPin || nouveauPin.length < 4) {
-    return res.status(400).json({ erreur: 'Le nouveau PIN doit faire au moins 4 chiffres' });
+    return res.status(400).json({ erreur: 'Le nouveau PIN doit faire au moins 4 caractères' });
   }
 
   const pinHash = await bcrypt.hash(nouveauPin, 10);
@@ -87,7 +87,7 @@ async function changerMonPin(req, res) {
     return res.status(400).json({ erreur: 'Ancien et nouveau PIN requis' });
   }
   if (nouveauPin.length < 4) {
-    return res.status(400).json({ erreur: 'Le nouveau PIN doit faire au moins 4 chiffres' });
+    return res.status(400).json({ erreur: 'Le nouveau PIN doit faire au moins 4 caractères' });
   }
 
   const utilisateur = await prisma.utilisateur.findUnique({ where: { id: req.utilisateur.id } });
