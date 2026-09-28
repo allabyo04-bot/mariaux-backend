@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { verifierToken, reserverAuCure } = require('../middleware/auth');
-const { recettesDuJour, recettesSemaine, etatRecettes, exporterRecettesCsv } = require('../controllers/dashboardController');
+const { recettesDuJour, recettesSemaine, recettesPeriode, etatRecettes, exporterRecettesCsv } = require('../controllers/dashboardController');
 
 router.use(verifierToken);
 
@@ -9,6 +9,7 @@ router.use(verifierToken);
 // du jour et de la semaine, indépendamment d'une éventuelle fermeture de caisse.
 router.get('/recettes-jour', recettesDuJour);
 router.get('/recettes-semaine', recettesSemaine);
+router.get('/recettes-periode', recettesPeriode);
 
 // Réservé au Curé
 router.get('/etat-recettes', reserverAuCure, etatRecettes);

@@ -255,4 +255,69 @@ async function recettesSemaine(req, res) {
   });
 }
 
-module.exports = { recettesDuJour, recettesSemaine, etatRecettes, exporterRecettesCsv };
+// Récap d'une période choisie (dates AAAA-MM-JJ), par désignation — accessible à la
+// Caisse comme au Curé (onglet "État" de la Secrétaire : jour, semaine, mois ou période
+// libre). Mêmes bornes de dates que etatRecettes, pour que les deux écrans donnent
+// exactement les mêmes totaux sur les mêmes dates. Les dons complémentaires (montant reçu
+// au-dessus du prix) ont leur propre ligne, pour que le total soit toujours égal à la
+// somme des lignes affichées.
+const JOUR_MS = 86400000;
+const PERIODE_MAX_JOURS = 366;
+
+async function recettesPeriode(req, res) {
+  const { debut, fin } = req.query;
+  const formatValide = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s);
+  if (!formatValide(debut) || !formatValide(fin)) {
+    return res.status(400).json({ erreur: 'Début et fin de période requis (AAAA-MM-JJ)' });
+  }
+
+  const dateDebut = new Date(debut);
+  const dateFin = new Date(`${fin}T23:59:59`);
+  if (Number.isNaN(dateDebut.getTime()) || Number.isNaN(dateFin.getTime())) {
+    return res.status(400).json({ erreur: 'Dates invalides' });
+  }
+  if (dateFin < dateDebut) {
+    return res.status(400).json({ erreur: 'La date de fin doit être après la date de début' });
+  }
+  if ((dateFin - dateDebut) / JOUR_MS > PERIODE_MAX_JOURS) {
+    return res.status(400).json({ erreur: `Période trop longue (${PERIODE_MAX_JOURS} jours maximum)` });
+  }
+
+  const filtreDate = { date: { gte: dateDebut, lte: dateFin } };
+
+  const lignes = await prisma.ligneFacture.findMany({
+    where: { facture: filtreDate },
+    include: { designation: true },
+  });
+  const parDesignation = regrouperParDesignation(lignes);
+  let total = lignes.reduce((somme, l) => somme + Number(l.montant), 0);
+
+  const factures = await prisma.facture.findMany({
+    where: filtreDate,
+    select: { montantRecu: true, netAPayer: true },
+  });
+  let excedent = 0;
+  let nombreDons = 0;
+  for (const f of factures) {
+    if (f.montantRecu === null) continue;
+    const e = Number(f.montantRecu) - Number(f.netAPayer);
+    if (e > 0) {
+      excedent += e;
+      nombreDons += 1;
+    }
+  }
+  if (excedent > 0) {
+    parDesignation.push({ libelle: 'Dons complémentaires', quantite: nombreDons, montant: excedent });
+    total += excedent;
+  }
+
+  res.json({
+    dateDebut: debut,
+    dateFin: fin,
+    nombreFactures: factures.length,
+    total,
+    parDesignation,
+  });
+}
+
+module.exports = { recettesDuJour, recettesSemaine, recettesPeriode, etatRecettes, exporterRecettesCsv };
