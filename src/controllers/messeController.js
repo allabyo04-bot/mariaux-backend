@@ -68,9 +68,17 @@ async function modifierDemandeMesse(req, res) {
   res.json(misAJour);
 }
 
+// Instant de début de la messe. Le Bénin est à UTC+1 toute l'année (pas d'heure d'été).
+// dateMesse est enregistrée à midi du jour de la messe : on en tire la date civile,
+// puis on y ajoute l'heure de début de la grille (ex : "19:30").
+function debutDeLaMesse(demandeMesse) {
+  const jour = demandeMesse.dateMesse.toISOString().slice(0, 10);
+  return new Date(`${jour}T${demandeMesse.heureDebut}:00+01:00`);
+}
+
 // Corrige le texte d'une intention déjà enregistrée (faute de frappe, etc.).
 // - La Caisse : une seule correction autorisée par intention, et seulement
-//   tant que la messe n'a pas encore eu lieu.
+//   jusqu'à l'heure de début de la messe.
 // - Le Curé : aucune limite (ni de nombre, ni de date).
 // Chaque correction est journalisée avec un motif obligatoire.
 async function corrigerIntention(req, res) {
@@ -91,8 +99,9 @@ async function corrigerIntention(req, res) {
   if (!demandeMesse) return res.status(404).json({ erreur: 'Demande de messe introuvable' });
 
   if (req.utilisateur.role === 'CAISSE') {
-    if (demandeMesse.dateMesse < new Date()) {
-      return res.status(403).json({ erreur: 'Cette messe a déjà eu lieu — seul le Curé peut encore corriger cette intention' });
+    const debut = debutDeLaMesse(demandeMesse);
+    if (Number.isNaN(debut.getTime()) || debut <= new Date()) {
+      return res.status(403).json({ erreur: 'Cette messe a déjà commencé — seul le Curé peut encore corriger cette intention' });
     }
     if (demandeMesse._count.corrections >= 1) {
       return res.status(403).json({ erreur: 'Cette intention a déjà été corrigée une fois — seul le Curé peut la corriger à nouveau' });
