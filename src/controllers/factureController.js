@@ -77,13 +77,30 @@ async function creerFacture(req, res) {
 
   const numero = await genererNumero();
 
+  // Montant libre (Type A uniquement) : quand le fidèle donne un montant qui ne
+  // correspond pas à un multiple exact du tarif habituel de la prestation (ex :
+  // 9750 F pour une désignation à 2000 F), la Caisse peut taper directement le
+  // montant réellement reçu pour cette ligne, à la place de quantité x prix fixe.
+  for (const ligne of lignes) {
+    const d = designationParId[ligne.designationId];
+    if (ligne.montant === undefined || ligne.montant === null || ligne.montant === '') continue;
+    if (d.type !== 'A') {
+      return res.status(400).json({ erreur: 'Le montant personnalisé n\'est autorisé que pour les prestations, pas pour une demande de messe' });
+    }
+    const m = Number(ligne.montant);
+    if (!Number.isFinite(m) || m <= 0) {
+      return res.status(400).json({ erreur: `Montant personnalisé invalide pour "${d.libelle}"` });
+    }
+  }
+
   let montantTotal = 0;
   const lignesData = lignes.map((ligne) => {
     const d = designationParId[ligne.designationId];
     // Pour Type B, la quantité = nombre de dates demandées (ex : neuvaine = 9)
     const quantite = d.type === 'B' ? ligne.demandeMesse.dates.length : Number(ligne.quantite) || 1;
-    const prixUnitaire = Number(d.prixUnitaire);
-    const montant = quantite * prixUnitaire;
+    const montantPersonnalise = ligne.montant !== undefined && ligne.montant !== null && ligne.montant !== '' ? Number(ligne.montant) : null;
+    const montant = montantPersonnalise !== null ? montantPersonnalise : quantite * Number(d.prixUnitaire);
+    const prixUnitaire = montantPersonnalise !== null ? montant / quantite : Number(d.prixUnitaire);
     montantTotal += montant;
     return { ligne, d, quantite, prixUnitaire, montant };
   });
